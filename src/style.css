@@ -42,6 +42,12 @@ h1 {
   text-align: center;
 }
 
+#canvas1 {
+  border: 2px solid black;
+  border-radius: 10px;
+  filter: drop-shadow(0 0 0.75rem crimson);
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
