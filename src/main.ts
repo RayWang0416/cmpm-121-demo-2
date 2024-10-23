@@ -10,6 +10,7 @@ app.innerHTML = `<h1>${APP_NAME}</h1>`;
 let isDrawing = false;
 let x = 0;
 let y = 0;
+let lines: Array<Array<{ x: number; y: number }>> = [];
 
 //Canvas
 const canvas = document.createElement("canvas");
@@ -21,34 +22,42 @@ app.appendChild(canvas);
 
 //canvas drawing
 canvas.addEventListener("mousedown", (e) => {
-    x = e.offsetX;
-    y = e.offsetY;
     isDrawing = true;
+    lines.push([{ x: e.offsetX, y: e.offsetY }]);
+    canvas.dispatchEvent(new Event("drawing-changed"));
 });
-
+  
 canvas.addEventListener("mousemove", (e) => {
-    if (isDrawing && ctx) {
-        drawLine(ctx, x, y, e.offsetX, e.offsetY);
-        x = e.offsetX;
-        y = e.offsetY;
+    if (isDrawing) {
+        const currentSegment = lines[lines.length - 1];
+        currentSegment.push({ x: e.offsetX, y: e.offsetY });
+        canvas.dispatchEvent(new Event("drawing-changed"));
     }
 });
   
-window.addEventListener("mouseup", (e) => {
-    if (isDrawing && ctx) {
-        drawLine(ctx, x, y, e.offsetX, e.offsetY);
-        x = 0;
-        y = 0;
-        isDrawing = false;
+window.addEventListener("mouseup", () => {
+    isDrawing = false;
+});
+  
+canvas.addEventListener("drawing-changed", () => {
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        redrawCanvas(ctx, lines);
     }
 });
 
-function drawLine(context: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
+function redrawCanvas(context: CanvasRenderingContext2D, line: Array<Array<{ x: number; y: number }>>) {
     context.beginPath();
     context.strokeStyle = "black";
     context.lineWidth = 1;
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
+    for (const l of line) {
+        if (l.length > 0) {
+            context.moveTo(l[0].x, l[0].y);
+            for (let i = 1; i < l.length; i++) {
+                context.lineTo(l[i].x, l[i].y);
+            }
+        }
+    }
     context.stroke();
     context.closePath();
 }
@@ -59,10 +68,12 @@ clearButton.innerText = "Clear";
 app.appendChild(clearButton);
 
 clearButton.addEventListener("click", () => {
+    lines = [];
     if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 });
+  
 
   
 
