@@ -72,6 +72,27 @@ canvas.addEventListener("mousemove", (e) => {
         const currentLine = lines[lines.length - 1];
         currentLine.drag(e.offsetX, e.offsetY);
         canvas.dispatchEvent(new Event("drawing-changed"));
+    } else {
+        const cursorSize = currentLineWidth;
+        canvas.style.cursor = `none`;
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            redrawCanvas(ctx, lines);
+            ctx.beginPath();
+            ctx.arc(e.offsetX, e.offsetY, cursorSize / 2, 0, 2 * Math.PI);
+            ctx.fillStyle = "black";
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+});
+
+//mouse out
+canvas.addEventListener("mouseout", () => {
+    canvas.style.cursor = "default";
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        redrawCanvas(ctx, lines);
     }
 });
 
