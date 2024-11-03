@@ -8,9 +8,10 @@ app.innerHTML = `<h1>${APP_NAME}</h1>`;
 
 //canvas constants and variables
 let isDrawing = false;
-let lines: Array<MarkerLine> = [];
-let redoStack: Array<MarkerLine> = [];
+let lines: Array<MarkerLine | Sticker> = [];
+let redoStack: Array<MarkerLine | Sticker> = [];
 let currentLineWidth = 1;
+let currentSticker: string | null = null;
 
 //canvas
 const canvas = document.createElement("canvas");
@@ -49,6 +50,29 @@ class MarkerLine {
     }
 }
 
+//class representing a sticker
+class Sticker {
+    private x: number;
+    private y: number;
+    private sticker: string;
+
+    constructor(x: number, y: number, sticker: string) {
+        this.x = x;
+        this.y = y;
+        this.sticker = sticker;
+    }
+
+    display(ctx: CanvasRenderingContext2D) {
+        ctx.font = "20px Arial";
+        ctx.fillText(this.sticker, this.x, this.y);
+    }
+
+    drag(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 //CANVAS DRAWING
 //drawing changed event
 canvas.addEventListener("drawing-changed", () => {
@@ -62,7 +86,11 @@ canvas.addEventListener("drawing-changed", () => {
 canvas.addEventListener("mousedown", (e) => {
     isDrawing = true;
     redoStack = [];
-    lines.push(new MarkerLine(e.offsetX, e.offsetY, currentLineWidth));
+    if (currentSticker) {
+        lines.push(new Sticker(e.offsetX, e.offsetY, currentSticker));
+    } else {
+        lines.push(new MarkerLine(e.offsetX, e.offsetY, currentLineWidth));
+    }
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
@@ -70,7 +98,11 @@ canvas.addEventListener("mousedown", (e) => {
 canvas.addEventListener("mousemove", (e) => {
     if (isDrawing) {
         const currentLine = lines[lines.length - 1];
-        currentLine.drag(e.offsetX, e.offsetY);
+        if (currentLine instanceof MarkerLine) {
+            currentLine.drag(e.offsetX, e.offsetY);
+        } else if (currentLine instanceof Sticker) {
+            currentLine.drag(e.offsetX, e.offsetY);
+        }
         canvas.dispatchEvent(new Event("drawing-changed"));
     } else {
         const cursorSize = currentLineWidth;
@@ -78,11 +110,16 @@ canvas.addEventListener("mousemove", (e) => {
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             redrawCanvas(ctx, lines);
-            ctx.beginPath();
-            ctx.arc(e.offsetX, e.offsetY, cursorSize / 2, 0, 2 * Math.PI);
-            ctx.fillStyle = "black";
-            ctx.fill();
-            ctx.closePath();
+            if (currentSticker) {
+                ctx.font = "20px Arial";
+                ctx.fillText(currentSticker, e.offsetX, e.offsetY);
+            } else {
+                ctx.beginPath();
+                ctx.arc(e.offsetX, e.offsetY, cursorSize / 2, 0, 2 * Math.PI);
+                ctx.fillStyle = "black";
+                ctx.fill();
+                ctx.closePath();
+            }
         }
     }
 });
@@ -101,7 +138,7 @@ window.addEventListener("mouseup", () => {
     isDrawing = false;
 });
 
-function redrawCanvas(context: CanvasRenderingContext2D, line: Array<MarkerLine>) {
+function redrawCanvas(context: CanvasRenderingContext2D, line: Array<MarkerLine | Sticker>) {
     context.strokeStyle = "black";
     for (const l of line) {
         l.display(context);
@@ -158,8 +195,10 @@ app.appendChild(thinMarkerButton);
 
 thinMarkerButton.addEventListener("click", () => {
     currentLineWidth = 1;
+    currentSticker = null;
     thinMarkerButton.classList.add("selectedTool");
     thickMarkerButton.classList.remove("selectedTool");
+    stickerButtons.forEach(button => button.classList.remove("selectedTool"));
 });
 
 //thick marker button
@@ -169,8 +208,31 @@ app.appendChild(thickMarkerButton);
 
 thickMarkerButton.addEventListener("click", () => {
     currentLineWidth = 5;
+    currentSticker = null;
     thickMarkerButton.classList.add("selectedTool");
     thinMarkerButton.classList.remove("selectedTool");
+    stickerButtons.forEach(button => button.classList.remove("selectedTool"));
+});
+
+// sticker buttons
+const stickers = ["😀", "🐱", "🌟"];
+const stickerButtons: HTMLButtonElement[] = [];
+stickers.forEach((sticker) => {
+    const button = document.createElement("button");
+    button.innerText = sticker;
+    app.appendChild(button);
+    stickerButtons.push(button);
+
+    button.addEventListener("click", () => {
+        currentSticker = sticker;
+        currentLineWidth = 0;
+        button.classList.add("selectedTool");
+        thinMarkerButton.classList.remove("selectedTool");
+        thickMarkerButton.classList.remove("selectedTool");
+        stickerButtons.forEach(b => {
+            if (b !== button) b.classList.remove("selectedTool");
+        });
+    });
 });
 
 //set default marker to thin
