@@ -10,6 +10,7 @@ app.innerHTML = `<h1>${APP_NAME}</h1>`;
 let isDrawing = false;
 let lines: Array<MarkerLine> = [];
 let redoStack: Array<MarkerLine> = [];
+let currentLineWidth = 1;
 
 //canvas
 const canvas = document.createElement("canvas");
@@ -23,13 +24,16 @@ app.appendChild(document.createElement("br"));
 //class representing a line marker
 class MarkerLine {
     private points: Array<{ x: number; y: number }> = [];
+    private lineWidth: number;
 
-    constructor(initialX: number, initialY: number) {
+    constructor(initialX: number, initialY: number, lineWidth: number) {
         this.points.push({ x: initialX, y: initialY });
+        this.lineWidth = lineWidth;
     }
 
     display(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
+        ctx.lineWidth = this.lineWidth;
         if (this.points.length > 0) {
             ctx.moveTo(this.points[0].x, this.points[0].y);
             for (let i = 1; i < this.points.length; i++) {
@@ -58,7 +62,7 @@ canvas.addEventListener("drawing-changed", () => {
 canvas.addEventListener("mousedown", (e) => {
     isDrawing = true;
     redoStack = [];
-    lines.push(new MarkerLine(e.offsetX, e.offsetY));
+    lines.push(new MarkerLine(e.offsetX, e.offsetY, currentLineWidth));
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
@@ -78,7 +82,6 @@ window.addEventListener("mouseup", () => {
 
 function redrawCanvas(context: CanvasRenderingContext2D, line: Array<MarkerLine>) {
     context.strokeStyle = "black";
-    context.lineWidth = 1;
     for (const l of line) {
         l.display(context);
     }
@@ -126,3 +129,28 @@ redoButton.addEventListener("click", () => {
         }
     }
 });
+
+//thin marker button
+const thinMarkerButton = document.createElement("button");
+thinMarkerButton.innerText = "Thin Marker";
+app.appendChild(thinMarkerButton);
+
+thinMarkerButton.addEventListener("click", () => {
+    currentLineWidth = 1;
+    thinMarkerButton.classList.add("selectedTool");
+    thickMarkerButton.classList.remove("selectedTool");
+});
+
+//thick marker button
+const thickMarkerButton = document.createElement("button");
+thickMarkerButton.innerText = "Thick Marker";
+app.appendChild(thickMarkerButton);
+
+thickMarkerButton.addEventListener("click", () => {
+    currentLineWidth = 5;
+    thickMarkerButton.classList.add("selectedTool");
+    thinMarkerButton.classList.remove("selectedTool");
+});
+
+//set default marker to thin
+thinMarkerButton.classList.add("selectedTool");
