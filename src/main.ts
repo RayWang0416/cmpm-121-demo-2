@@ -8,10 +8,10 @@ app.innerHTML = `<h1>${APP_NAME}</h1>`;
 
 //canvas constants and variables
 let isDrawing = false;
-let lines: Array<Array<{ x: number; y: number }>> = [];
-let redoStack: Array<Array<{ x: number; y: number }>> = [];
+let lines: Array<MarkerLine> = [];
+let redoStack: Array<MarkerLine> = [];
 
-//Canvas
+//canvas
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 256;
@@ -19,6 +19,31 @@ canvas.height = 256;
 canvas.id = "canvas1";
 app.appendChild(canvas);
 app.appendChild(document.createElement("br"));
+
+//class representing a line marker
+class MarkerLine {
+    private points: Array<{ x: number; y: number }> = [];
+
+    constructor(initialX: number, initialY: number) {
+        this.points.push({ x: initialX, y: initialY });
+    }
+
+    display(ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        if (this.points.length > 0) {
+            ctx.moveTo(this.points[0].x, this.points[0].y);
+            for (let i = 1; i < this.points.length; i++) {
+                ctx.lineTo(this.points[i].x, this.points[i].y);
+            }
+        }
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    drag(x: number, y: number) {
+        this.points.push({ x, y });
+    }
+}
 
 //CANVAS DRAWING
 //drawing changed event
@@ -33,15 +58,15 @@ canvas.addEventListener("drawing-changed", () => {
 canvas.addEventListener("mousedown", (e) => {
     isDrawing = true;
     redoStack = [];
-    lines.push([{ x: e.offsetX, y: e.offsetY }]);
+    lines.push(new MarkerLine(e.offsetX, e.offsetY));
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
 //mouse move
 canvas.addEventListener("mousemove", (e) => {
     if (isDrawing) {
-        const currentSegment = lines[lines.length - 1];
-        currentSegment.push({ x: e.offsetX, y: e.offsetY });
+        const currentLine = lines[lines.length - 1];
+        currentLine.drag(e.offsetX, e.offsetY);
         canvas.dispatchEvent(new Event("drawing-changed"));
     }
 });
@@ -51,20 +76,12 @@ window.addEventListener("mouseup", () => {
     isDrawing = false;
 });
 
-function redrawCanvas(context: CanvasRenderingContext2D, line: Array<Array<{ x: number; y: number }>>) {
-    context.beginPath();
+function redrawCanvas(context: CanvasRenderingContext2D, line: Array<MarkerLine>) {
     context.strokeStyle = "black";
     context.lineWidth = 1;
     for (const l of line) {
-        if (l.length > 0) {
-            context.moveTo(l[0].x, l[0].y);
-            for (let i = 1; i < l.length; i++) {
-                context.lineTo(l[i].x, l[i].y);
-            }
-        }
+        l.display(context);
     }
-    context.stroke();
-    context.closePath();
 }
 
 //clear canvas button
@@ -109,7 +126,3 @@ redoButton.addEventListener("click", () => {
         }
     }
 });
-  
-
-  
-
