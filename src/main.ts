@@ -190,11 +190,11 @@ redoButton.addEventListener("click", () => {
 
 //thin marker button
 const thinMarkerButton = document.createElement("button");
-thinMarkerButton.innerText = "Thin Marker";
+thinMarkerButton.innerText = "Pen";
 app.appendChild(thinMarkerButton);
 
 thinMarkerButton.addEventListener("click", () => {
-    currentLineWidth = 1;
+    currentLineWidth = 3;
     currentSticker = null;
     thinMarkerButton.classList.add("selectedTool");
     thickMarkerButton.classList.remove("selectedTool");
@@ -203,11 +203,11 @@ thinMarkerButton.addEventListener("click", () => {
 
 //thick marker button
 const thickMarkerButton = document.createElement("button");
-thickMarkerButton.innerText = "Thick Marker";
+thickMarkerButton.innerText = "Brush";
 app.appendChild(thickMarkerButton);
 
 thickMarkerButton.addEventListener("click", () => {
-    currentLineWidth = 5;
+    currentLineWidth = 6;
     currentSticker = null;
     thickMarkerButton.classList.add("selectedTool");
     thinMarkerButton.classList.remove("selectedTool");
@@ -218,7 +218,7 @@ thickMarkerButton.addEventListener("click", () => {
 thinMarkerButton.classList.add("selectedTool");
 
 //sticker buttons
-const stickers = ["😀", "🐱", "🌟"];
+const stickers = ["🌟", "🌈", "🎉"];
 const stickerButtons: HTMLButtonElement[] = [];
 stickers.forEach((sticker) => {
     const button = document.createElement("button");
