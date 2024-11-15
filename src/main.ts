@@ -22,19 +22,26 @@ canvas.id = "canvas1";
 app.appendChild(canvas);
 app.appendChild(document.createElement("br"));
 
+const penColor = "black";
+const brushColor = "red";
+let currentColor = penColor;
+
 //class representing a line marker
 class MarkerLine {
     private points: Array<{ x: number; y: number }> = [];
     private lineWidth: number;
+    private color: string;
 
     constructor(initialX: number, initialY: number, lineWidth: number) {
         this.points.push({ x: initialX, y: initialY });
         this.lineWidth = lineWidth;
+        this.color = currentColor;
     }
 
     display(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
         ctx.lineWidth = this.lineWidth;
+        ctx.strokeStyle = this.color;
         if (this.points.length > 0) {
             ctx.moveTo(this.points[0].x, this.points[0].y);
             for (let i = 1; i < this.points.length; i++) {
@@ -55,21 +62,28 @@ class Sticker {
     private x: number;
     private y: number;
     private sticker: string;
+    private angle: number;s
 
     constructor(x: number, y: number, sticker: string) {
         this.x = x;
         this.y = y;
         this.sticker = sticker;
+        this.angle = stickerRotationAngle;
     }
 
     display(ctx: CanvasRenderingContext2D) {
-        ctx.font = "20px Arial";
-        ctx.fillText(this.sticker, this.x, this.y);
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.angle * Math.PI) / 180);
+        ctx.font = "24px Arial";
+        ctx.fillText(this.sticker, 0, 0);
+        ctx.restore();
     }
 
     drag(x: number, y: number) {
         this.x = x;
         this.y = y;
+        this.angle = stickerRotationAngle;
     }
 }
 
@@ -195,6 +209,7 @@ app.appendChild(thinMarkerButton);
 
 thinMarkerButton.addEventListener("click", () => {
     currentLineWidth = 3;
+    currentColor = penColor;
     currentSticker = null;
     thinMarkerButton.classList.add("selectedTool");
     thickMarkerButton.classList.remove("selectedTool");
@@ -208,6 +223,7 @@ app.appendChild(thickMarkerButton);
 
 thickMarkerButton.addEventListener("click", () => {
     currentLineWidth = 6;
+    currentColor = brushColor;
     currentSticker = null;
     thickMarkerButton.classList.add("selectedTool");
     thinMarkerButton.classList.remove("selectedTool");
@@ -253,6 +269,22 @@ customStickerButton.addEventListener("click", () => {
         thickMarkerButton.classList.remove("selectedTool");
         stickerButtons.forEach(button => button.classList.remove("selectedTool"));
     }
+});
+
+//slide for stickers
+const rotationSlider = document.createElement("input");
+rotationSlider.type = "range";
+rotationSlider.min = "0";
+rotationSlider.max = "360";
+rotationSlider.value = "0";
+rotationSlider.id = "rotationSlider";
+app.appendChild(document.createTextNode("Rotation: "));
+app.appendChild(rotationSlider);
+
+let stickerRotationAngle = 0;
+
+rotationSlider.addEventListener("input", (e) => {
+    stickerRotationAngle = parseInt((e.target as HTMLInputElement).value);
 });
 
 //export button
