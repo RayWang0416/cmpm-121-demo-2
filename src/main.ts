@@ -287,6 +287,7 @@ rotationSlider.addEventListener("input", (e) => {
     stickerRotationAngle = parseInt((e.target as HTMLInputElement).value);
 });
 
+
 //export button
 const exportButton = document.createElement("button");
 exportButton.innerText = "Export as PNG";
