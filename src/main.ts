@@ -214,6 +214,9 @@ thickMarkerButton.addEventListener("click", () => {
     stickerButtons.forEach(button => button.classList.remove("selectedTool"));
 });
 
+//set default marker to thin
+thinMarkerButton.classList.add("selectedTool");
+
 //sticker buttons
 const stickers = ["😀", "🐱", "🌟"];
 const stickerButtons: HTMLButtonElement[] = [];
@@ -235,7 +238,7 @@ stickers.forEach((sticker) => {
     });
 });
 
-//add custom sticker button
+//custom sticker button
 const customStickerButton = document.createElement("button");
 customStickerButton.innerText = "Add Custom Sticker";
 app.appendChild(customStickerButton);
@@ -252,6 +255,22 @@ customStickerButton.addEventListener("click", () => {
     }
 });
 
+//export button
+const exportButton = document.createElement("button");
+exportButton.innerText = "Export as PNG";
+app.appendChild(exportButton);
 
-//set default marker to thin
-thinMarkerButton.classList.add("selectedTool");
+exportButton.addEventListener("click", () => {
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = 1024;
+    exportCanvas.height = 1024;
+    const exportCtx = exportCanvas.getContext("2d");
+    if (exportCtx) {
+        exportCtx.scale(4, 4);
+        redrawCanvas(exportCtx, lines);
+        const anchor = document.createElement("a");
+        anchor.href = exportCanvas.toDataURL("image/png");
+        anchor.download = "sketchpad.png";
+        anchor.click();
+    }
+});
