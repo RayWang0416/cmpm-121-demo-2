@@ -214,7 +214,7 @@ thickMarkerButton.addEventListener("click", () => {
     stickerButtons.forEach(button => button.classList.remove("selectedTool"));
 });
 
-// sticker buttons
+//sticker buttons
 const stickers = ["😀", "🐱", "🌟"];
 const stickerButtons: HTMLButtonElement[] = [];
 stickers.forEach((sticker) => {
@@ -234,6 +234,24 @@ stickers.forEach((sticker) => {
         });
     });
 });
+
+//add custom sticker button
+const customStickerButton = document.createElement("button");
+customStickerButton.innerText = "Add Custom Sticker";
+app.appendChild(customStickerButton);
+
+customStickerButton.addEventListener("click", () => {
+    const customStickerText = prompt("Enter custom sticker text:", "");
+    if (customStickerText) {
+        currentSticker = customStickerText;
+        currentLineWidth = 0;
+        customStickerButton.classList.add("selectedTool");
+        thinMarkerButton.classList.remove("selectedTool");
+        thickMarkerButton.classList.remove("selectedTool");
+        stickerButtons.forEach(button => button.classList.remove("selectedTool"));
+    }
+});
+
 
 //set default marker to thin
 thinMarkerButton.classList.add("selectedTool");
