@@ -1,5 +1,12 @@
 import "./style.css";
 
+// Application constants
+const CANVAS_WIDTH = 256;
+const CANVAS_HEIGHT = 256;
+const DEFAULT_PEN_COLOR = "black";
+const DEFAULT_BRUSH_COLOR = "red";
+
+
 const APP_NAME = "Cat";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -16,14 +23,14 @@ let currentSticker: string | null = null;
 //canvas
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = 256;
-canvas.height = 256;
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
 canvas.id = "canvas1";
 app.appendChild(canvas);
 app.appendChild(document.createElement("br"));
 
-const penColor = "black";
-const brushColor = "red";
+const penColor = DEFAULT_PEN_COLOR;
+const brushColor = DEFAULT_BRUSH_COLOR;
 let currentColor = penColor;
 
 //class representing a line marker
