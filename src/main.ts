@@ -1,8 +1,8 @@
 import "./style.css";
 
 // Application constants
-const CANVAS_WIDTH = 256;
-const CANVAS_HEIGHT = 256;
+const CANVAS_WIDTH = 512;
+const CANVAS_HEIGHT = 512;
 const DEFAULT_PEN_COLOR = "black";
 const DEFAULT_BRUSH_COLOR = "red";
 
@@ -313,4 +313,47 @@ exportButton.addEventListener("click", () => {
         anchor.download = "sketchpad.png";
         anchor.click();
     }
+});
+
+// Dynamic Tool Preview Class
+class ToolPreview {
+    private previewElement: HTMLDivElement;
+
+    constructor() {
+        this.previewElement = document.createElement("div");
+        this.previewElement.style.position = "absolute";
+        this.previewElement.style.pointerEvents = "none";
+        this.previewElement.style.borderRadius = "50%";
+        this.previewElement.style.border = "1px solid rgba(0, 0, 0, 0.2)";
+        this.previewElement.style.zIndex = "1000";
+        document.body.appendChild(this.previewElement);
+        this.hide();
+    }
+
+    show(x: number, y: number, size: number, color: string) {
+        this.previewElement.style.width = `${size}px`;
+        this.previewElement.style.height = `${size}px`;
+        this.previewElement.style.backgroundColor = color;
+        this.previewElement.style.left = `${x - size / 2}px`;
+        this.previewElement.style.top = `${y - size / 2}px`;
+        this.previewElement.style.display = "block";
+    }
+
+    hide() {
+        this.previewElement.style.display = "none";
+    }
+}
+
+const toolPreview = new ToolPreview();
+
+// Add mousemove and mouseleave event listeners to canvas
+canvas.addEventListener("mousemove", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    toolPreview.show(event.clientX, event.clientY, currentLineWidth * 5, currentColor);
+});
+
+canvas.addEventListener("mouseleave", () => {
+    toolPreview.hide();
 });
